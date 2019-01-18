@@ -51,6 +51,9 @@ public class SaveLoadActivity3 extends AppCompatActivity {
         setContentView(R.layout.activity_save_load3);
 
 
+        int z;
+        //TEXT FOR FIRST COMMIT
+
         if (getIntent().getStringExtra("choice").equals("ACTION_OPEN_DOCUMENT")) {
             Log.d(TAG, "Doing ACTION_OPEN_DOCUMENT");
             String pathAsString = Environment.getExternalStorageDirectory() + "/myscientificapp/measurements/";
@@ -66,7 +69,6 @@ public class SaveLoadActivity3 extends AppCompatActivity {
             } else {
                 Log.d(TAG, "pathAsFile does NOT exists!");
             }
-
             android.net.Uri pathAsUri = Uri.fromFile(pathAsFile);
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);

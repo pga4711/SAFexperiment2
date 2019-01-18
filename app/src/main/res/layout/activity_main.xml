@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="10dp"
+    android:paddingTop="10dp"
+    android:paddingRight="10dp"
+    android:paddingBottom="10dp">
+
+    <EditText
+        android:id="@+id/num1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:hint="1st Number"
+        android:visibility="gone"/>
+
+    <EditText
+        android:id="@id/num2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/num1"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="39dp"
+        android:hint="2nd Number"
+        android:visibility="gone"/>
+
+    <Button
+        android:id="@+id/btnAdd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/num2"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="39dp"
+        android:text="Multiplication"
+        android:visibility="gone"/>/>
+
+    <Button
+        android:id="@+id/loadFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btnAdd"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="39dp"
+        android:text="Load File" />
+
+    <Button
+        android:id="@+id/saveFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/loadFile"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="39dp"
+        android:text="Save File" />
+
+</RelativeLayout>

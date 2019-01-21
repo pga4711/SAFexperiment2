@@ -1,5 +1,6 @@
 package com.example.safexperiment2;
 
+import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.Manifest;
 import android.content.Intent;
@@ -8,8 +9,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.support.v4.content.ContextCompat;
 
@@ -25,9 +30,13 @@ public class MainActivity extends AppCompatActivity {
     Button btn;
     Button loadBtn;
     Button saveBtn;
+    TextView textView1;
 
-    String resultX;
+    Spinner spinner;
 
+    Button printTreeUriBtn;
+
+    Uri eventualTreeUri;
 
     String strUrl = "foooooo";
 
@@ -76,7 +85,16 @@ public class MainActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(MainActivity.this, SaveLoadActivity3.class);
 
-                intent.putExtra("choice", "ACTION_OPEN_DOCUMENT");
+                //Ifa om textView1 är null?
+                intent.putExtra("choice", textView1.getText());
+                if (eventualTreeUri==null) {
+                    Log.d(TAG, "eventualTreeUri is null, be careful. eventualTreeUri: " + eventualTreeUri);
+                }
+                else {
+                    Log.d(TAG, "Soo, we have saved a eventualTreeUri. This is eventualTreeUri: " + eventualTreeUri);
+                    Log.d(TAG, "Now we putExtra of eventualTreeUri");
+                    intent.putExtra("treeUri", eventualTreeUri);
+                }
 
                 MainActivity.this.startActivityForResult(intent, ACTIVITY_ONE_CODE);
 
@@ -87,7 +105,8 @@ public class MainActivity extends AppCompatActivity {
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Here, thisActivity is the current activity
+
+                //SAVE BUTTON IS DISABLED FOR THE MOMENT
                 grantPermissions();
 
                 Log.d(TAG, "Intent startup");
@@ -100,7 +119,40 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        textView1 = (TextView) findViewById(R.id.textView1);
 
+        spinner = (Spinner) findViewById(R.id.spinner1);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.spinner_array, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinner.setAdapter(adapter);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                textView1.setText(parent.getItemAtPosition(position).toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        printTreeUriBtn = (Button) findViewById(R.id.printTreeUri);
+        printTreeUriBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (eventualTreeUri!=null) {
+                    Log.d(TAG, "treeUri.toString(): " + eventualTreeUri.toString());
+                }
+                else {
+                    Log.d(TAG, "treeUri is NULL!");
+                }
+            }
+        });
     }
 
     protected void grantPermissions() {
@@ -125,25 +177,28 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         // Check which request we're responding to
-        if (requestCode == ACTIVITY_ONE_CODE) {
+        if (requestCode == ACTIVITY_ONE_CODE && resultCode == RESULT_OK) {
 
-            if (resultCode == RESULT_OK) {
+            String status = data.getStringExtra("status");
+            Log.d(TAG, "ACTIVITY_ONE_CODE This is status: " + status);
 
-                String status = data.getStringExtra("status");
-                Log.d(TAG, "ACTIVITY_ONE_CODE This is status: " + status);
-
+            Uri treeUri = data.getParcelableExtra("treeUri");
+            //eventualTreeUri = data.getStringExtra("treeUri"); //Om det är null gör inget
+            if (treeUri==null) {
+                Log.d(TAG, "No treeUri this time, eventualTreeUri remain null");
+            }
+            else {
+                //LETS ASSIGN
+                eventualTreeUri = treeUri;
+                Log.d(TAG, "There seems to be an treeUri. This is the eventualTreeUri: " + eventualTreeUri.toString());
             }
         }
-        else if (requestCode == ACTIVITY_TWO_CODE) {
+        else if (requestCode == ACTIVITY_TWO_CODE && resultCode == RESULT_OK) {
 
-            if (resultCode == RESULT_OK) {
+            String status = data.getStringExtra("status");
+            Log.d(TAG, "ACTIVITY_TWO_CODE This is status: " + status);
 
-                String status = data.getStringExtra("status");
-                Log.d(TAG, "ACTIVITY_TWO_CODE This is status: " + status);
-
-            }
         }
-
 
     }
 

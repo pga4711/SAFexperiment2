@@ -1,5 +1,6 @@
 package com.example.safexperiment2;
 
+import android.support.v4.content.FileProvider;
 import android.support.v4.provider.DocumentFile;
 import android.support.v7.app.AppCompatActivity;
 import android.Manifest;
@@ -43,95 +44,105 @@ public class SaveLoadActivity3 extends AppCompatActivity {
     public final static String CRLF  = "" + CR + LF;
 
     static final int REQUEST_OPEN_DOCUMENT = 1;
-    static final int REQUEST_CREATE_DOCUMENT = 1;
+    static final int REQUEST_CREATE_DOCUMENT = 2;
+    static final int REQUEST_OPEN_DOCUMENT_TREE = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_save_load3);
 
-
-        int z;
-        //TEXT FOR FIRST COMMIT
-
         if (getIntent().getStringExtra("choice").equals("ACTION_OPEN_DOCUMENT")) {
             Log.d(TAG, "Doing ACTION_OPEN_DOCUMENT");
             String pathAsString = Environment.getExternalStorageDirectory() + "/myscientificapp/measurements/";
-            File pathAsFile = new File(pathAsString);
+            File pathAsFile = new File(Environment.getExternalStorageDirectory() + "/myscientificapp/measurements/");
 
-            if (pathAsFile.isDirectory()) {
-                Log.d(TAG, "pathAsFile is directory!");
-            } else {
-                Log.d(TAG, "pathAsFile is NOT a directory!");
-            }
-            if (pathAsFile.exists()) {
-                Log.d(TAG, "pathAsFile exists!");
-            } else {
-                Log.d(TAG, "pathAsFile does NOT exists!");
-            }
-            android.net.Uri pathAsUri = Uri.fromFile(pathAsFile);
+            android.net.Uri pathAsUriFile = Uri.fromFile(pathAsFile);
+            android.net.Uri pathAsUriContent = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".fileprovider", pathAsFile);
+
+            Log.d(TAG, "This is pathAsString:                  " + pathAsString);
+            Log.d(TAG, "This is pathAsFile.getAbsolutePath():  " + pathAsFile.getAbsolutePath());
+            Log.d(TAG, "This is pathAsUriFile:                 " + pathAsUriFile.toString());
+            Log.d(TAG, "This is pathAsUriContent:              " + pathAsUriContent.toString());
+
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.setType("*/*");
-            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pathAsUri);
+            //intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pathAsUriContent); //Does not make effect
             startActivityForResult(intent, REQUEST_OPEN_DOCUMENT);
         }
-        else if (getIntent().getStringExtra("choice").equals("ACTION_CREATE_DOCUMENT")) {
-            Log.d(TAG, "Doing ACTION_CREATE_DOCUMENT");
-            String pathAsString = Environment.getExternalStorageDirectory() + "/myscientificapp/measurements/";
-            File pathAsFile = new File(pathAsString);
 
-            if (pathAsFile.isDirectory()) {
-                Log.d(TAG, "pathAsFile is directory!");
-            } else {
-                Log.d(TAG, "pathAsFile is NOT a directory!");
+        else if (getIntent().getStringExtra("choice").equals("ACTION_OPEN_DOCUMENT_with_last_tree_uri")) {
+            Uri pathAsUriContent = getIntent().getParcelableExtra("treeUri");
+            if (pathAsUriContent == null) {
+                Log.d(TAG, "pathAsUriContent is null!");
+                Intent output = new Intent();
+                output.putExtra("status", "There are no saved URI tree!"); //Send an uri back through the intent-extra-pipeline
+                setResult(RESULT_OK, output);
+                finish();
             }
-            if (pathAsFile.exists()) {
-                Log.d(TAG, "pathAsFile exists!");
-            } else {
-                Log.d(TAG, "pathAsFile does NOT exists!");
+            else {
+                Log.d(TAG, "pathAsUriContent! contains: " + pathAsUriContent.toString());
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("*/*");
+                intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pathAsUriContent); //Does not make effect
+                startActivityForResult(intent, REQUEST_OPEN_DOCUMENT);
             }
+        }
 
-            android.net.Uri pathAsUri = Uri.fromFile(pathAsFile);
+        else if (getIntent().getStringExtra("choice").equals("ACTION_CREATE_DOCUMENT_with_last_tree_uri")) {
+            Log.d(TAG, "Doing ACTION_CREATE_DOCUMENT_with_last_tree_uri");
+            Uri pathAsUriContent = getIntent().getParcelableExtra("treeUri");
 
-            Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+            if (pathAsUriContent == null) {
+                Log.d(TAG, "pathAsUriContent is null!");
+                Intent output = new Intent();
+                output.putExtra("status", "There are no saved URI tree. We have no ACTION_CREATE_DOCUMENT without uri concepts yet!"); //Send an uri back through the intent-extra-pipeline
+                setResult(RESULT_OK, output);
+                finish();
+            }
+            else {
+                Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("*/*");
+                intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pathAsUriContent); //Does not make effect
+                intent.putExtra(Intent.EXTRA_TITLE, "newfile.txt");
 
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("*/*");
-            intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, pathAsUri);
-            intent.putExtra(Intent.EXTRA_TITLE, "newfile.txt");
-
-            startActivityForResult(intent, REQUEST_CREATE_DOCUMENT);
+                startActivityForResult(intent, REQUEST_CREATE_DOCUMENT);
+            }
+        }
+        else if (getIntent().getStringExtra("choice").equals("ACTION_OPEN_DOCUMENT_TREE")) {
+            Log.d(TAG, "Doing ACTION_OPEN_DOCUMENT_TREE. We do not use saved tree uris here");
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+            startActivityForResult(intent, REQUEST_OPEN_DOCUMENT_TREE);
         }
     }
 
-    //Denna anropas alltid när en activity är typ klar. Den funkar osm ett slot i QT.
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "Returned from activity.");
 
         Intent output = new Intent();
-        if (resultCode == RESULT_OK)
-        {
-            if(requestCode == REQUEST_OPEN_DOCUMENT)
-            {
-                String[] theUrisAsStr = { data.getData().toString() };
-                new CacheFileAsyncTask().execute(theUrisAsStr);
-            }
+        if (resultCode == RESULT_OK && requestCode == REQUEST_OPEN_DOCUMENT) {
+            String[] theUrisAsStr = { data.getData().toString() };
+
+            new CacheFileAsyncTask().execute(theUrisAsStr); //This will actually read the file and extract the string.
         }
-        else if (resultCode == RESULT_OK)
-        {
-            if(requestCode == REQUEST_CREATE_DOCUMENT)
-            {
-                String[] theUrisAsStr = { data.getData().toString() };
-                output.putExtra("status", "Done with REQUEST_CREATE_DOCUMENT. This is theUrisAsStr: " + theUrisAsStr);
-                setResult(RESULT_OK, output); //OK REALLY? OR RESULT_CANCEL?
-                finish();
-            }
+        else if (resultCode == RESULT_OK && requestCode == REQUEST_CREATE_DOCUMENT) {
+            String[] theUrisAsStr = { data.getData().toString() };
+            output.putExtra("status", "Done with REQUEST_CREATE_DOCUMENT. This is theUrisAsStr: " + theUrisAsStr[0]);
+            setResult(RESULT_OK, output); //OK REALLY? OR RESULT_CANCEL?
+            finish();
         }
-        else
-        {
+        else if (resultCode == RESULT_OK && requestCode == REQUEST_OPEN_DOCUMENT_TREE) {
+            output.putExtra("treeUri", data.getData());
+            output.putExtra("status", "Done with REQUEST_OPEN_DOCUMENT_TREE. This is saved now: " + data.getData().toString());
+            setResult(RESULT_OK, output); //OK REALLY? OR RESULT_CANCEL?
+            finish();
+        }
+        else {
             output.putExtra("status", "NO FILE OR ERROR");
             setResult(RESULT_OK, output); //OK REALLY? OR RESULT_CANCEL?
             finish();
@@ -140,7 +151,7 @@ public class SaveLoadActivity3 extends AppCompatActivity {
 
     private void finishWithCreatedPath(String path) {
         Intent output = new Intent();
-        output.putExtra("satus", path); //Send an uri back through the intent-extra-pipeline
+        output.putExtra("status", path); //Send an uri back through the intent-extra-pipeline
 
         setResult(RESULT_OK, output);
         Log.d(TAG, "Before finish();");
@@ -164,14 +175,9 @@ public class SaveLoadActivity3 extends AppCompatActivity {
         private final String TAG = CacheFileAsyncTask.class.getName();
 
         @Override
-        protected void onPreExecute() {
-            //super.onPreExecute();
-        }
-
-        @Override
         protected String doInBackground(String... theUrisAsStr) {
             Uri theUri =  Uri.parse(theUrisAsStr[0]);
-            Context theContext = getApplicationContext(); //FUNKAR NOG
+            Context theContext = getApplicationContext();
 
             try {
                 InputStreamReader attachmentISR = new InputStreamReader(theContext.getContentResolver().openInputStream(theUri), Charset.forName("UTF-8"));
@@ -192,7 +198,7 @@ public class SaveLoadActivity3 extends AppCompatActivity {
                 attachmentISR.close();
                 Log.d(TAG, getContentName(theContext.getContentResolver(), theUri));
                 Log.d(TAG, output.toString());
-
+                //fileSelected(getContentName(theContext.getContentResolver(), theUri), output.toString());
                 return "File reading finished. Please look at JNI callback";
             }
 

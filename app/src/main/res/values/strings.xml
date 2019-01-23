@@ -4,6 +4,7 @@
         <item>ACTION_OPEN_DOCUMENT</item>
         <item>ACTION_OPEN_DOCUMENT_with_last_tree_uri</item>
         <item>ACTION_CREATE_DOCUMENT_with_last_tree_uri</item>
+        <item>ACTION_CREATE_DOCUMENT</item>
         <item>ACTION_OPEN_DOCUMENT_TREE</item>
     </string-array>
 </resources>
